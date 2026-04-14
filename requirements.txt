@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+agno
+requests
+beautifulsoup4
+html2text
+reportlab
+lxml
+playwright
+python-dotenv
