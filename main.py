@@ -1,3 +1,4 @@
+import asyncio
 import os
 import re
 import unicodedata
@@ -48,21 +49,22 @@ async def download(req: DownloadRequest):
     with tempfile.TemporaryDirectory() as tmpdir:
         try:
             if is_spa(req.url):
-                title, blocks = download_rise(req.url, use_vision=req.vision)
+                # Playwright sync não pode rodar em loop async — usa thread
+                title, blocks = await asyncio.to_thread(download_rise, req.url, req.vision)
                 if not blocks:
                     raise HTTPException(422, "Nenhum conteúdo encontrado na URL.")
                 filename = os.path.join(tmpdir, slugify(title))
                 if fmt == "pdf":
-                    save_pdf(title, blocks, filename)
+                    await asyncio.to_thread(save_pdf, title, blocks, filename)
                     out = filename + ".pdf"
                 else:
                     save_markdown(title, blocks, filename)
                     out = filename + ".md"
             else:
-                title, markdown = fetch(req.url)
+                title, markdown = await asyncio.to_thread(fetch, req.url)
                 filename = os.path.join(tmpdir, slugify(title))
                 if fmt == "pdf":
-                    to_pdf(title, markdown, filename)
+                    await asyncio.to_thread(to_pdf, title, markdown, filename)
                     out = filename + ".pdf"
                 else:
                     to_markdown(title, markdown, filename)
