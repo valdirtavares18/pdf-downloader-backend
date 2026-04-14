@@ -4,7 +4,7 @@ import re
 import unicodedata
 import tempfile
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -88,14 +88,16 @@ async def download(req: DownloadRequest):
         except Exception as e:
             raise HTTPException(500, f"Erro ao processar: {str(e)}")
 
-        media = "application/pdf" if fmt == "pdf" else "text/markdown"
+        media = "application/pdf" if fmt == "pdf" else "text/markdown; charset=utf-8"
         basename = os.path.basename(out)
-        return FileResponse(
-            path=out,
-            media_type=media,
-            filename=basename,
-            background=None,
-        )
+        with open(out, "rb") as f:
+            content = f.read()
+
+    return Response(
+        content=content,
+        media_type=media,
+        headers={"Content-Disposition": f'attachment; filename="{basename}"'},
+    )
 
 
 @app.get("/health")
