@@ -3,8 +3,8 @@ import os
 import re
 import unicodedata
 import tempfile
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -22,6 +22,18 @@ app.add_middleware(
     allow_credentials=False,
     expose_headers=["Content-Disposition"],
 )
+
+# Garante CORS mesmo em respostas de erro
+@app.middleware("http")
+async def cors_on_errors(request: Request, call_next):
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        response = JSONResponse({"detail": str(e)}, status_code=500)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    return response
 
 
 class DownloadRequest(BaseModel):
