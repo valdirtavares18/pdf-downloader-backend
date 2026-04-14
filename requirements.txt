@@ -1,11 +1,11 @@
 fastapi
 uvicorn[standard]
 python-multipart
-agno
 requests
 beautifulsoup4
 html2text
 reportlab
+fpdf2
 lxml
 playwright
 python-dotenv
