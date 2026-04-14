@@ -7,11 +7,6 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Importa os scrapers existentes
-sys_path_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-import sys
-sys.path.insert(0, sys_path_dir)
-
 from rise_downloader import download_rise, save_markdown, save_pdf
 from downloader import fetch, to_markdown, to_pdf
 from urllib.parse import urlparse
